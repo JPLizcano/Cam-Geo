@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cam_geo/geolocalizar.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Camara extends StatefulWidget {
@@ -13,29 +14,63 @@ class Camara extends StatefulWidget {
 
 class _CamaraState extends State<Camara> {
   File? _img;
+  var msg = "No ha seleccionado una imágen";
 
-  Future<void> _optionsDialogBox() {
+  Future<void> _opciones() {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color.fromARGB(100, 255, 255, 255),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                GestureDetector(
-                  child: const Text('Tomar foto'),
-                  onTap: () {
+                ElevatedButton(
+                  onPressed: () {
                     _openCam(1);
                     Navigator.of(context).pop();
                   },
+                  style: ButtonStyle(
+                      foregroundColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.amber.shade900),
+                      backgroundColor: MaterialStateColor.resolveWith(
+                          (states) => const Color.fromARGB(170, 0, 0, 0))),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera_alt),
+                        Text(
+                          '  Tomar foto',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const Padding(padding: EdgeInsets.all(10)),
-                GestureDetector(
-                  child: const Text('Seleccionar de galería'),
-                  onTap: () {
+                const Padding(padding: EdgeInsets.only(bottom: 10)),
+                ElevatedButton(
+                  onPressed: () {
                     _openCam(2);
                     Navigator.of(context).pop();
                   },
+                  style: ButtonStyle(
+                      foregroundColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.amber.shade900),
+                      backgroundColor: MaterialStateColor.resolveWith(
+                          (states) => const Color.fromARGB(170, 0, 0, 0))),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Icon(Icons.photo),
+                        Text(
+                          '  Seleccionar de la galería',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -56,9 +91,30 @@ class _CamaraState extends State<Camara> {
       if (image != null) {
         _img = File(image.path);
       } else {
-        print("No hay imagen seleccionada");
+        msg = "No ha seleccionado una imágen";
       }
     });
+  }
+
+  Future<void> _save() {
+    var fnl;
+    if (_img == null) {
+      fnl = "Error al guardar la imágen!";
+    } else {
+      GallerySaver.saveImage(_img!.path);
+      fnl = "Imgágen guardada con éxito...";
+      setState(() {
+        _img = null;
+      });
+    }
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(fnl),
+        );
+      },
+    );
   }
 
   @override
@@ -120,35 +176,72 @@ class _CamaraState extends State<Camara> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-            child: ElevatedButton(
-              onPressed: () {
-                _optionsDialogBox();
-              },
-              style: ButtonStyle(
-                  foregroundColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.amber.shade900),
-                  backgroundColor: MaterialStateColor.resolveWith(
-                      (states) => const Color.fromARGB(255, 0, 0, 0))),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.camera),
-                    Text(
-                      '  Camera',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _opciones();
+                    },
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.amber.shade900),
+                        backgroundColor: MaterialStateColor.resolveWith(
+                            (states) => const Color.fromARGB(255, 0, 0, 0))),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.camera),
+                          Text(
+                            '  Camera',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _save();
+                    },
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.amber.shade900),
+                        backgroundColor: MaterialStateColor.resolveWith(
+                            (states) => const Color.fromARGB(255, 0, 0, 0))),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.save_alt),
+                          Text(
+                            '  Guardar',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          _img == null ? const Center() : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50),
-            child: Image.file(_img!),
-          )
+          _img == null
+              ? Text(msg)
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Image.file(_img!),
+                ),
         ],
       ),
     );
