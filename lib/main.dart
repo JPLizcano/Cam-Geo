@@ -1,4 +1,4 @@
-import 'package:cam_geo/geolocalizar.dart';
+import 'package:cam_geo/camara.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,7 +13,7 @@ class MainApp extends StatelessWidget {
     return const MaterialApp(
       // theme: ThemeData.dark(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: Geolocalizador()
+      home: Camara()
     );
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:cam_geo/camara.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +12,8 @@ class Geolocalizador extends StatefulWidget {
 }
 
 class _GeolocalizadorState extends State<Geolocalizador> {
+  var lon;
+  var lat;
   Future<Position> determinePos() async {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
@@ -24,8 +28,12 @@ class _GeolocalizadorState extends State<Geolocalizador> {
 
   void getCurrentPos() async {
     Position position = await determinePos();
-    print(position.latitude);
-    print(position.longitude);
+    setState(() {
+      lon = position.longitude;
+      lat = position.latitude;
+    });
+    print("Latitud: ${position.latitude}");
+    print("Longitud: ${position.longitude}");
   }
 
   @override
@@ -86,32 +94,39 @@ class _GeolocalizadorState extends State<Geolocalizador> {
         ),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50),
-          child: ElevatedButton(
-            onPressed: () {
-              getCurrentPos();
-            },
-            style: ButtonStyle(
-              foregroundColor: MaterialStateColor.resolveWith(
-                  (states) => Colors.amber.shade900),
-              backgroundColor: MaterialStateColor.resolveWith(
-                (states) => const Color.fromARGB(255, 0, 0, 0),
-              ),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.pin_drop),
-                  Text(
-                    '  Localizar',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  getCurrentPos();
+                },
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.amber.shade900),
+                  backgroundColor: MaterialStateColor.resolveWith(
+                    (states) => const Color.fromARGB(255, 0, 0, 0),
                   ),
-                ],
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Icon(Icons.pin_drop),
+                      Text(
+                        '  Localizar',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+            const Text('Su localización actual es: '),
+            Text('Latitud: $lat'),
+            Text('Longitud: $lon'),
+          ],
         ),
       ),
     );

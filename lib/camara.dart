@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cam_geo/geolocalizar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +12,8 @@ class Camara extends StatefulWidget {
 }
 
 class _CamaraState extends State<Camara> {
+  File? _img;
+
   Future<void> _optionsDialogBox() {
     return showDialog(
       context: context,
@@ -21,14 +25,16 @@ class _CamaraState extends State<Camara> {
                 GestureDetector(
                   child: const Text('Tomar foto'),
                   onTap: () {
-                    _openCam();
+                    _openCam(1);
+                    Navigator.of(context).pop();
                   },
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
                 GestureDetector(
                   child: const Text('Seleccionar de galería'),
                   onTap: () {
-                    _openGal();
+                    _openCam(2);
+                    Navigator.of(context).pop();
                   },
                 ),
               ],
@@ -39,12 +45,20 @@ class _CamaraState extends State<Camara> {
     );
   }
 
-  void _openCam() {
-    ImagePicker().pickImage(source: ImageSource.camera);
-  }
-
-  void _openGal() {
-    ImagePicker().pickImage(source: ImageSource.gallery);
+  Future _openCam(op) async {
+    var image;
+    if (op == 1) {
+      image = await ImagePicker().pickImage(source: ImageSource.camera);
+    } else {
+      image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    }
+    setState(() {
+      if (image != null) {
+        _img = File(image.path);
+      } else {
+        print("No hay imagen seleccionada");
+      }
+    });
   }
 
   @override
@@ -104,32 +118,38 @@ class _CamaraState extends State<Camara> {
           ],
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50),
-          child: ElevatedButton(
-            onPressed: () {
-              _optionsDialogBox();
-            },
-            style: ButtonStyle(
-                foregroundColor: MaterialStateColor.resolveWith(
-                    (states) => Colors.amber.shade900),
-                backgroundColor: MaterialStateColor.resolveWith(
-                    (states) => const Color.fromARGB(255, 0, 0, 0))),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.camera),
-                  Text(
-                    '  Camera',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                _optionsDialogBox();
+              },
+              style: ButtonStyle(
+                  foregroundColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.amber.shade900),
+                  backgroundColor: MaterialStateColor.resolveWith(
+                      (states) => const Color.fromARGB(255, 0, 0, 0))),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(Icons.camera),
+                    Text(
+                      '  Camera',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+          _img == null ? const Center() : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50),
+            child: Image.file(_img!),
+          )
+        ],
       ),
     );
   }
