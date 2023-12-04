@@ -12,6 +12,12 @@ class Geolocalizador extends StatefulWidget {
 }
 
 class _GeolocalizadorState extends State<Geolocalizador> {
+  @override
+  void initState() {
+    super.initState();
+    getCurrentPos();
+  }
+
   var lon;
   var lat;
   Future<Position> determinePos() async {
@@ -29,8 +35,13 @@ class _GeolocalizadorState extends State<Geolocalizador> {
   void getCurrentPos() async {
     Position position = await determinePos();
     setState(() {
-      lon = position.longitude;
-      lat = position.latitude;
+      if (lon == null && lat == null) {
+        lon = "...";
+        lat = "...";
+      } else {
+        lon = position.longitude;
+        lat = position.latitude;
+      }
     });
     print("Latitud: ${position.latitude}");
     print("Longitud: ${position.longitude}");
