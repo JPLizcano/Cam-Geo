@@ -101,7 +101,7 @@ class _CamaraState extends State<Camara> {
     if (_img == null) {
       fnl = "Error al guardar la imágen!";
     } else {
-      GallerySaver.saveImage(_img!.path);
+      GallerySaver.saveImage(_img!.path, albumName: "Flutter");
       fnl = "Imgágen guardada con éxito...";
       setState(() {
         _img = null;
